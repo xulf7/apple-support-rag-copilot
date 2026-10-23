@@ -1,0 +1,56 @@
+[
+  {
+    "source_url": "https://support.apple.com/en-us/118428",
+    "observed_final_url": "https://support.apple.com/en-us/118428",
+    "observed_title": "Cancel a subscription from Apple",
+    "topic": "subscriptions",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Device-specific step order; already-cancelled condition; trial deadlines and non-Apple billing"
+  },
+  {
+    "source_url": "https://support.apple.com/en-us/101567",
+    "observed_final_url": "https://support.apple.com/en-us/101567",
+    "observed_title": "Change your Apple Account password",
+    "topic": "apple_account",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Trusted-device prerequisites; device headings; security delay; child-account restrictions"
+  },
+  {
+    "source_url": "https://support.apple.com/en-us/108366",
+    "observed_final_url": "https://support.apple.com/en-us/108366",
+    "observed_title": "How to back up your iPhone or iPad with iCloud",
+    "topic": "icloud",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Manual versus automatic backup; Wi-Fi, power and locked-screen conditions; storage warning; older OS exception"
+  },
+  {
+    "source_url": "https://support.apple.com/en-us/118223",
+    "observed_final_url": "https://support.apple.com/en-us/118223",
+    "observed_title": "Request a refund for apps or content that you bought from Apple",
+    "topic": "subscriptions",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Eligibility is conditional; pending/unpaid purchases; country differences; status update versus receipt of funds"
+  },
+  {
+    "source_url": "https://support.apple.com/en-us/102656",
+    "observed_final_url": "https://support.apple.com/en-us/102656",
+    "observed_title": "If you forgot your password and can’t sign in to your Apple Account",
+    "topic": "apple_account",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Recovery factors; trusted device versus no trusted device; prerequisites; no guarantees of immediate recovery"
+  },
+  {
+    "source_url": "https://support.apple.com/en-us/118574",
+    "observed_final_url": "https://support.apple.com/en-us/118574",
+    "observed_title": "What to expect during account recovery",
+    "topic": "apple_account",
+    "locale": "en-us",
+    "discovery_method": "provided seed; web metadata verification 2026-10-23",
+    "review_focus": "Wait and confirmation timing; OS-dependent device-use conditions; actions that cancel recovery; support cannot shorten wait"
+  }
+]
