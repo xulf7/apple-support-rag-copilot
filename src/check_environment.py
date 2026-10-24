@@ -7,8 +7,8 @@ import sys
 
 def main():
     packages = {}
-    for name in ["requests", "beautifulsoup4", "pypdf", "pytest", "numpy", "torch",
-                 "transformers", "sentence-transformers", "faiss-cpu", "tokenizers"]:
+    for name in ["requests", "beautifulsoup4", "soupsieve", "numpy", "torch",
+                 "transformers", "sentence-transformers", "faiss-cpu", "tokenizers", "Flask", "Werkzeug"]:
         try:
             packages[name] = version(name)
         except PackageNotFoundError:

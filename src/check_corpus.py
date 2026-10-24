@@ -1,4 +1,4 @@
-"""Check real saved-body coverage independently of the Markdown renderer.
+"""Compare snapshot structure, paragraph coverage and retained rendered text.
 
 This is a structural comparison, not human approval of Apple procedures.
 """
@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from src.ingest import atomic_text, check_record, now
+from src.ingest import atomic_text, blocks, check_record, now, prune_chrome
 
 
 def compact(text):
@@ -25,23 +25,15 @@ def audit(root, row):
         return {"doc_id": row["doc_id"], "title": row["title"],
                 "integrity_check": "passed", "html_structure_status": "not_applicable",
                 "reason": "Text snapshot: HTML paragraph, heading, step and link comparisons are not applicable",
-                "human_review": row["human_review"], "passed": True}
+                "human_review": row["human_review"], "passed": True,
+                "review_note": "Text integrity is not semantic approval; compare with the official source manually."}
     if suffix not in {".html", ".htm"}:
         raise ValueError("Unsupported snapshot format")
     soup = BeautifulSoup((root / row["snapshot_path"]).read_bytes(), "html.parser")
-    body = soup.select_one("#content > #sections")
-    if body is None:
-        raise ValueError("Real snapshot lacks the expected Apple article container")
-    # Compare only official information, excluding the identified generic help CTA.
-    for n in body.select("script, style, noscript, .content-type-dropdown"):
-        n.decompose()
-    for h in list(body.find_all(re.compile(r"^h[2-6]$"))):
-        if h.get_text(" ", strip=True) == "Need more help?":
-            for n in list(h.next_siblings):
-                if getattr(n, "name", None) and re.fullmatch(r"h[1-6]", n.name):
-                    break
-                n.extract()
-            h.decompose()
+    body = soup.select_one("#content > #sections") or soup.select_one("article") or soup.select_one("main")
+    if body is None or len(body.find_all("h1")) != 1:
+        raise ValueError("Snapshot lacks an article container with exactly one h1")
+    prune_chrome(body)
     clean = row["text"]
     plain = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", clean)
     flat = compact(plain)
@@ -74,14 +66,21 @@ def audit(root, row):
                       if a.get_text(" ", strip=True) and not a.find_parent(class_="videoComponentContainer")}
     # Generic media playback links are outside the text knowledge base.
     missing_links = sorted(link for link in expected_links if f"]({link})" not in clean)
-    unwanted = [word for word in ["Apple Footer", "Helpful?", "Maximum character limit", "Thanks for your feedback.", "Choose your device"] if word in clean]
+    # Independent paragraph/heading/step/link checks above are supplemented by
+    # full rendered-body coverage. Extra navigation/feedback text cannot pass
+    # merely because all real paragraphs are also present. Normalize formatting,
+    # not wording: legitimate error names and device instructions remain valid.
+    expected_body = "\n\n".join(blocks(body))
+    expected_plain = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", expected_body)
+    body_matches = flat == compact(expected_plain)
     result = {"doc_id": row["doc_id"], "title": row["title"], "paragraphs_checked": len(paragraphs),
               "missing_paragraphs": missing, "paragraphs_in_order": paragraphs_in_order, "headings_checked": len(headings),
               "headings_in_order": actual_headings == expected_headings,
               "ordered_steps_checked": len(expected_numbers), "ordered_step_numbers_match": actual_numbers == expected_numbers,
               "links_checked": len(expected_links), "missing_links": missing_links,
-              "unwanted_content": unwanted, "human_review": row["human_review"]}
-    result["passed"] = not (missing or missing_links or unwanted) and paragraphs_in_order and result["headings_in_order"] and result["ordered_step_numbers_match"]
+              "body_matches_snapshot": body_matches, "human_review": row["human_review"],
+              "review_note": "Structure checks cannot determine semantic validity; manual content review remains necessary."}
+    result["passed"] = not (missing or missing_links) and body_matches and paragraphs_in_order and result["headings_in_order"] and result["ordered_step_numbers_match"]
     result["integrity_check"] = "passed"
     result["html_structure_status"] = "passed" if result["passed"] else "failed"
     return result

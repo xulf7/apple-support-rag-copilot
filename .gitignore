@@ -1,4 +1,4 @@
-# Local references, third-party full text and private execution records.
+# 仅本机保留：原始资料、第三方全文、运行记录和工程归档。
 /library/
 /data/manual/
 /data/raw/
@@ -6,13 +6,15 @@
 /data/sources.jsonl
 /data/logs/
 /evidence/
-/docs/ROUND_1_RESULTS.md
+/dev_records/
 
 # Secrets and machine-specific configuration; keep the empty template public.
 .env
 .env.*
 !.env.example
 /.local/
+/.flaskenv
+/instance/
 /.aws/
 /config/local.*
 /config/secrets.*

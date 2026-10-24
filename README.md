@@ -1,140 +1,57 @@
-﻿# Apple Support RAG Copilot
+# Apple Support RAG Copilot：项目说明
 
-MIS2001 academic prototype for internal customer service staff. Suggested responses
-will require staff review. This project is not affiliated with Apple.
+这是 MIS2001 小组项目，为内部客服人员提供有来源的回复建议。客服输入客户问题，
+系统检索 Apple 官方支持资料，再由 LLM（大语言模型）根据证据草拟回复，供客服核对后使用。
 
-**Current status: data preparation and command-line vector retrieval.** Six frozen
-English (`en-us`) articles passed software checks and AI content review. The user
-also checked the entire Change your Apple Account password page, with no issue.
-Full human review of all six is not claimed; legacy pending fields are unchanged.
-Local embedding, persisted FAISS indexing and evidence search are implemented.
-LLM generation and a web interface are **not implemented**; this is not a complete MVP.
+**当前已完成资料准备、本地向量检索和网页雏形；真实 LLM 服务尚未接入。**
+现在运行网页可以查看真实检索片段及来源，生成区会显示“生成未配置”。
 
-The public source tree includes code, synthetic tests, URL seeds and documentation.
-It does **not** include Apple article bodies, course handouts, API keys, local
-corpus files or raw execution evidence. A fresh checkout starts with no corpus.
+## 写作同学从哪里开始
 
-## 1. Environment and tests - no corpus needed
+| 阅读顺序 | 文档 | 解决什么问题 |
+|---|---|---|
+| 1 | [架构与写作说明](docs/ARCHITECTURE.md) | 项目为什么做、系统怎样工作、为什么这样设计、已有结果是什么 |
+| 2 | [任务与进度](docs/MVP_PLAN_AND_TASKS.md) | 哪些已完成、哪些待验收、接下来做什么 |
+| 按需 | [资料与运行指南](docs/DATA_PREPARATION.md) | 六篇来源、如何准备数据、运行和检查程序 |
+| 提交前 | [小组协作指南](CONTRIBUTING.md) | VS Code 提交、个人分支、PR 审查和合并规则 |
 
-The existing conda **rag** environment (Python 3.11.5) is the recommended project
-environment. Its existing packages were reused without installation/upgrades.
-Select `rag` in VS Code and activate it in the terminal. Basic dependencies are
-in `requirements.txt`; optional retrieval versions are recorded in
-`requirements-retrieval.txt`. Check first and install only missing compatible
-packages; do not blindly upgrade an existing environment.
+只参与报告写作，不需要先装环境或阅读工程日志。
 
-From the project root in PowerShell:
+## 当前可以写进报告的事实
 
-```powershell
-conda activate rag
-python -B -m src.check_environment
-python -B -m src.ingest --help
-python -B -m unittest discover -s tests -v
-```
+截至 2026-10-25，维护者本机的验证结果如下：
 
-Tests use clearly labelled synthetic fixtures in temporary directories and mocked
-network requests. They require no `library/`, real Apple pages, historical evidence
-or API key. Test success does not demonstrate real model/API operation.
+- 六篇英文官方文章已保存、清洗并检查，覆盖 Apple 账户、订阅和 iCloud 备份。
+- 本地 MiniLM 模型与 FAISS 索引可用：6 篇文章、56 个片段、384 维向量。
+- 21 个带预期文档标签的开发问题，预期文章均排第 1；这不是回答正确率。
+- 65 项 Python 自动测试、5 项前端逻辑测试通过；真实 LLM 和浏览器使用体验仍待验收。
 
-## 2. Prepare your own local corpus
+方法和结果的含义见架构说明，六篇官方链接见资料指南；理解这些结论不需要访问本机日志。
 
-Article text is third-party material and is not supplied with this source tree.
-Obtain pages through permitted public access and observe applicable access/use
-conditions. Manual saving does not grant unrestricted redistribution rights.
-Do not bypass login, CAPTCHA or access restrictions. Keep saved content local.
+## 本机目录与 GitHub 的区别
 
-1. Select the official URLs in [data/seeds.json](data/seeds.json).
-2. Save the first three seed pages (one per topic) from a normal browser as HTML
-   into `data/manual/`. Browser-generated filenames are accepted.
-3. Import the pilot, inspect raw/clean content, then save/import the remaining pages.
+| 目录 | 用途 | GitHub 是否包含 |
+|---|---|---|
+| `src/`、`tests/`、`config/`、`evaluation/` | 源码、测试、配置和开发问题集 | 包含 |
+| `docs/` | 给组员阅读的三份中文说明 | 包含 |
+| `data/seeds.json` | 官方来源网址清单，不含全文 | 包含 |
+| `data/manual/`、`data/raw/`、`data/clean/`、`data/sources.jsonl` | 本机保存的原文、清洗正文和当前资料映射 | 不包含，需自行准备 |
+| `models/`、`data/index/` | 下载的模型和生成的向量索引 | 不包含 |
+| `evidence/` | 程序运行产生的导入报告、测试日志、检索结果、哈希检查 | 不包含 |
+| `dev_records/` | 开发调试记录、旧文档和审查原件的本地归档 | 不包含 |
+| `library/`、`.env` | 原始课程材料、本机密钥配置 | 不包含 |
 
-```powershell
-New-Item -ItemType Directory -Force -Path data/manual | Out-Null
-# Save the first three official pages before running this.
-python -B -m src.import_saved --limit 3 --provenance "Describe your actual acquisition method and intended use"
-python -B -m src.ingest validate
-python -B -m src.check_corpus
-# Inspect the pilot, then save the remaining pages before expanding.
-python -B -m src.import_saved --limit 6 --provenance "Describe your actual acquisition method and intended use"
-```
+`evidence/` 中的文件用于维护者复查某次运行，不是写作同学必须取得的附件。
+例如旧导入报告记录“原文件名 → 文章 → 清洗文件”的对应关系；公开文档直接说明
+处理方法和检查结果，不再要求组员先找到某个被忽略的 JSON 文件。
 
-The importer matches canonical URLs and h1 titles, never renames originals, and
-reports skipped unrelated files separately. Missing selected articles, wrong
-titles and duplicate selected identities are errors. It never chooses an arbitrary
-duplicate. Saved content must still pass extraction and integrity checks.
+## 需要运行程序时
 
-For UTF-8 text import, retain the exact title, Markdown section headings, ordered
-steps and conditions. See the [data contract](docs/DATA_PREPARATION.md) and
-[Chinese manual collection guide](docs/MANUAL_COLLECTION_ZH.md).
-
-Automatic HTTP collection remains gated by documented applicable permission and
-live robots checks. It is not needed for manual import. Do not invent permission.
-
-## 3. Checks after a corpus exists
+按[资料与运行指南](docs/DATA_PREPARATION.md)准备环境和本机数据，然后运行：
 
 ```powershell
-python -B -m src.ingest validate
-python -B -m src.check_corpus
+python -B -m src.web --port 5000
 ```
 
-Both commands return nonzero for an empty corpus. `validate` checks metadata,
-IDs, body/snapshot hashes, local files and deduplication. `check_corpus` also checks
-HTML headings, paragraphs, numbered steps and links. Valid text records receive
-integrity checks but explicitly report HTML comparison as `not_applicable`; they
-are not counted as HTML structure passes. Individual article errors remain in the
-report, other articles continue, and errors produce a nonzero exit status.
-
-The only active corpus is `data/sources.jsonl`, which maps each current document
-to its raw and clean version. Never ingest every file under `data/clean/`: earlier
-versions are retained there. See the [review record](docs/ARTICLE_REVIEW.md) for
-stage acceptance and remaining human-review limits.
-
-## 4. Local embedding and retrieval - no LLM key
-
-After local corpus preparation/review, download the fixed public model once:
-
-```powershell
-conda activate rag
-python -B -m src.embedding download
-python -B -m src.embedding check
-python -B -m src.retrieval build
-python -B -m src.retrieval inspect
-python -B -m src.retrieval query --question "How do I cancel an Apple subscription on my iPhone?"
-```
-
-`query` without `--question` prompts for an English question. Default top-k is 5;
-use `--json` for structured output. Only the explicit download command needs
-network access; model checks, builds and queries load local files only. Missing
-resources fail clearly. MiniLM runs on CPU and returns normalized 384-dimensional
-vectors; FAISS exact inner-product scores equal cosine similarity, not answer
-correctness probabilities. No customer response is generated.
-
-The tokenizer counts the complete model input, including title, section/context
-and special tokens. Configured limit is 240 versus the actual model limit of 256;
-the current 56 chunks have a maximum of 233 tokens. Index reload verifies model,
-configuration, active corpus, source mapping and artifact hashes. A mismatch
-requires explicit rebuilding: `python -B -m src.retrieval build --rebuild`.
-An unchanged repeat build uses the existing index without appending vectors.
-
-See [retrieval design and results](docs/RETRIEVAL_20261024.md) and
-[the archived review](docs/reviews/DATA_REVIEW_FINAL_20261024.md).
-
-## Public files and local records
-
-- Public: `src/`, `tests/`, `requirements.txt`, `.env.example`, URL-only
-  `data/seeds.json`, README and selected documentation under `docs/`.
-- Local/ignored: `library/`, `data/manual/`, `data/raw/`, `data/clean/`,
-  `data/sources.jsonl`, `data/logs/`, `evidence/`, and the original environment
-  report at `docs/ROUND_1_RESULTS.md`. These are absent from a public checkout.
-- Generated caches, environments, model/index output, runtime output and review
-  packages are also ignored. See [.gitignore](.gitignore).
-
-Read the [task tracker](docs/MVP_PLAN_AND_TASKS.md),
-[short data results](docs/MANUAL_IMPORT_RESULTS_20261024.md), and
-[public-preparation notes](docs/PUBLIC_PREPARATION.md).
-
-`.env.example` is an empty template for a future generator; this data CLI neither
-loads nor needs it. Never publish real keys or personal customer information.
-Ignoring files does not untrack existing files or remove them from Git history.
-No open-source license has been selected; Apple content is not covered by a
-project code license.
+打开 `http://127.0.0.1:5000`。系统不自动向客户发送回复。
+项目为课程原型，与 Apple 无隶属关系；第三方全文、密钥和本机日志不上传公开仓库。

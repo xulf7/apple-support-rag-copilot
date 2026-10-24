@@ -18,7 +18,14 @@ import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
 
 USER_AGENT = "MIS2001AcademicIngest/0.1"
-TOPICS = {"apple_account", "subscriptions", "icloud"}
+
+
+def validate_topic(topic):
+    """Topic is descriptive metadata, not a runtime business-scope allowlist."""
+    if (not isinstance(topic, str) or not topic.strip() or topic != topic.strip()
+            or len(topic) > 80 or any(ord(c) < 32 for c in topic)):
+        raise ValueError("Topic must be a nonempty label of up to 80 characters without control characters")
+    return topic
 
 
 def now():
@@ -117,10 +124,22 @@ def validate_text(title, text):
         raise ValueError("No section headings: retain the official heading structure")
     if title.strip() not in text.splitlines()[0]:
         raise ValueError("First line must contain the article title")
-    for phrase in ("access denied", "verify you are human", "maximum character limit is 250",
-                   "globalnav", "page not found", "please don’t include any personal information in your comment"):
-        if phrase in text.lower():
-            raise ValueError(f"Possible error page or navigation/feedback contamination: {phrase}")
+
+
+def prune_chrome(container):
+    """Remove identified DOM regions, never classify an article by its wording."""
+    for node in container.select("nav, footer, script, style, form, button, input, select, noscript, [role=navigation], .ac-gf-footer, #article-helpful, .helpful, .article-feedback, .content-type-dropdown"):
+        node.decompose()
+    # Apple marks its generic contact CTA as an icon action in a direct section
+    # group. A heading such as 'Need more help?' alone is ordinary article text.
+    for group in container.find_all(class_="gb-group"):
+        if (group.parent is None or group.parent.get("id") != "sections"
+                or group.find(["ol", "ul", "table", "pre"])):
+            continue
+        if any(a.get("link-type") == "ICON" and a.get("href", "").startswith("https://getsupport.apple.com/")
+               for p in group.find_all("p", recursive=False)
+               for a in p.find_all("a", recursive=False)):
+            group.decompose()
 
 
 def extract_html(raw, final_url):
@@ -138,16 +157,7 @@ def extract_html(raw, final_url):
         plain = item.get_text(" ", strip=True)
         if plain.startswith("Published Date:") and len(plain) < 100:
             published = plain.split(":", 1)[1].strip() or None
-    for junk in container.select("nav, footer, script, style, form, button, input, select, noscript, [role=navigation], .ac-gf-footer, #article-helpful, .helpful, .article-feedback, .content-type-dropdown"):
-        junk.decompose()
-    # Remove only recognized trailing support/feedback sections, never generic notes.
-    for heading in list(container.find_all(re.compile("^h[2-6]$"))):
-        if heading.get_text(" ", strip=True).lower() in {"need more help?", "helpful?"}:
-            for sibling in list(heading.next_siblings):
-                if isinstance(sibling, Tag) and sibling.name and re.fullmatch(r"h[1-6]", sibling.name):
-                    break
-                sibling.extract()
-            heading.decompose()
+    prune_chrome(container)
     for a in container.find_all("a", href=True):
         a["href"] = urljoin(final_url, a["href"])
     text = "\n\n".join(blocks(container)).strip() + "\n"
@@ -164,8 +174,9 @@ def check_record(root, record):
     doc_id, locale = identity(record["source_url"])
     if identity(record["final_url"]) != (doc_id, locale):
         raise ValueError("Source/final URL article or locale mismatch")
-    if record["doc_id"] != doc_id or record["locale"] != locale or record["topic"] not in TOPICS:
-        raise ValueError("Document identity/topic mismatch")
+    if record["doc_id"] != doc_id or record["locale"] != locale:
+        raise ValueError("Document identity mismatch")
+    validate_topic(record["topic"])
     if record["ingestion_method"] not in {"http", "manual"} or not record["permission_basis"].strip():
         raise ValueError("Missing import provenance")
     if datetime.fromisoformat(record["fetched_at"]).tzinfo is None:
@@ -191,8 +202,7 @@ def store(root, seed, raw, final_url, method, permission_basis, fmt="html", titl
     doc_id, locale = identity(seed["source_url"])
     if identity(final_url) != (doc_id, locale):
         raise ValueError("Redirect changed article ID or locale; review URL mapping before import")
-    if seed["topic"] not in TOPICS:
-        raise ValueError("Unsupported topic")
+    validate_topic(seed["topic"])
     if fmt == "html":
         title, text, published = extract_html(raw.decode("utf-8-sig"), final_url)
     else:
@@ -311,10 +321,10 @@ def main():
     p.add_argument("--file", type=Path, required=True)
     p.add_argument("--url", required=True)
     p.add_argument("--final-url")
-    p.add_argument("--topic", choices=sorted(TOPICS), required=True)
+    p.add_argument("--topic", type=validate_topic, required=True, help="Descriptive topic label; no fixed topic catalog")
     p.add_argument("--format", choices=["html", "text"], required=True)
     p.add_argument("--title", help="Required for text; first line must contain this title")
-    p.add_argument("--provenance", "--permission-basis", dest="permission_basis", required=True,
+    p.add_argument("--provenance", dest="permission_basis", required=True,
                    help="How this local file was obtained and intended use; not a claim of official permission")
     sub.add_parser("validate")
     args = parser.parse_args()

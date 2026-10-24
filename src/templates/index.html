@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apple Support RAG Copilot · Staff workspace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='copilot.css') }}">
+  <script src="{{ url_for('static', filename='copilot.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="brand-icon" aria-hidden="true">C</span><span>Support Copilot</span></div><span class="workspace">INTERNAL STAFF WORKSPACE</span></header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">APPLE SUPPORT · ENGLISH / US</p><h1>Evidence first.<br>People make the final call.</h1><p class="lead">Inspect guidance from the locally loaded support knowledge base.</p></div><div class="scope"><span class="status-dot" aria-hidden="true"></span><span id="resource-status">Checking local resources…</span></div></section>
+    <div id="service-banner" class="banner" role="status">Checking generation availability…</div>
+    <div class="work-grid">
+      <section class="panel question-panel" aria-labelledby="question-heading">
+        <div class="panel-heading"><span class="step">01</span><h2 id="question-heading">Customer question</h2></div>
+        <p class="muted">Use a fictional or de-identified question in English.</p>
+        <form id="question-form">
+          <label for="question">What does the customer need help with?</label>
+          <textarea id="question" name="question" rows="7" maxlength="2000" required placeholder="How do I cancel an Apple subscription on my iPhone?"></textarea>
+          <div class="form-meta"><span>One question at a time</span><span id="character-count">0 / 2000</span></div>
+          <button class="submit" id="submit-button" type="submit">Search evidence <span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="sample-label">TRY A SAMPLE</p>
+        <div class="samples"><button type="button" data-question="How do I cancel an Apple subscription on my iPhone?">Cancel a subscription</button><button type="button" data-question="How do I back up my iPhone manually with iCloud?">Back up an iPhone</button><button type="button" data-question="Can Apple Support shorten the account recovery wait?">Account recovery</button></div>
+      </section>
+      <section class="panel response-panel" aria-labelledby="response-heading" id="response-panel" aria-busy="false">
+        <div class="panel-heading"><span class="step">02</span><h2 id="response-heading">Suggested response</h2><span class="review-tag">STAFF REVIEW REQUIRED</span></div>
+        <div class="response-state"><span id="request-status" class="state-label">Ready to search</span><p id="result-message" role="status">Ask a question to inspect the supporting guidance.</p></div>
+        <pre id="answer" class="answer" hidden></pre>
+        <div class="sources"><h3>Sources cited in the response</h3><p class="muted" id="sources-empty">No sources cited in the response.</p><div id="sources-list"></div></div>
+        <p class="review-note">Check each claim, device requirement and exception before replying to the customer.</p>
+      </section>
+    </div>
+    <section class="evidence-section" aria-labelledby="evidence-heading"><div class="evidence-heading"><div><p class="eyebrow">INSPECT THE ORIGINAL GUIDANCE</p><h2 id="evidence-heading">Retrieved evidence <span id="evidence-count">0</span></h2></div><p class="muted">Similarity measures retrieval relevance,<br>not the probability of a correct answer.</p></div><div id="evidence-list" class="evidence-list"><p class="empty-evidence">Retrieved passages will appear here. They are not automatically cited sources.</p></div></section>
+    <footer>Academic prototype · Not affiliated with Apple · Suggested replies are for human staff review · No replies are sent automatically.</footer>
+  </main>
+</body>
+</html>

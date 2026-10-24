@@ -1,169 +1,126 @@
-# Data preparation and acceptance
+# 资料与运行指南
 
-## Access and provenance
+本文供需要运行或维护程序的组员使用。只做报告写作时，先读[架构说明](ARCHITECTURE.md)。
 
-Review date: 2026-10-23, Asia/Shanghai. The provided materials require allowed
-public access and prohibit circumvention.
+## 1. 首批资料来自哪里
 
-Apple's [Website Terms of Use](https://www.apple.com/legal/internet-services/terms/site.html)
-include restrictions in “Your Use of the Site” on page scraping/robots and
-conditions on copying knowledge-base material in “Content”. On that basis,
-automatic article collection is blocked by default. This is an implementation
-decision based on the observed terms, not a claim of legal permission or a legal
-opinion. Ordinary page visibility and robots allowance do not resolve reuse
-permission. Do not publish imported full text or treat manual copying as a way
-around these restrictions.
+目前使用六篇 Apple 官方英文支持文章，语言地区为 `en-us`。下表使用中文简称，
+原始英文标题和网址可在[种子清单](../data/seeds.json)核对。它们是首批资料范围，
+不构成程序中的固定主题白名单。
 
-The [robots file](https://support.apple.com/robots.txt), viewed through the web
-tool, has a wildcard group whose disallow patterns do not match these six direct
-article URLs. Local requests for robots failed: sandbox ProxyError/WinError
-10061; approved out-of-sandbox retry SSLError/UNEXPECTED_EOF_WHILE_READING.
-TLS verification was never disabled; no proxy, headers, or browser identities
-were changed to circumvent restrictions. Metadata verification through the web
-tool is not a raw snapshot or successful local HTTP ingestion.
+| 主题 | 官方来源（中文简称） | 核对重点 |
+|---|---|---|
+| Apple 账户 | [修改账户密码](https://support.apple.com/en-us/101567) | 可信设备前提、设备分支、安全延迟 |
+| Apple 账户 | [忘记密码及无法登录](https://support.apple.com/en-us/102656) | 不同恢复方式及其条件 |
+| Apple 账户 | [账户恢复期间的预期情况](https://support.apple.com/en-us/118574) | 等待、使用设备的限制及取消恢复的条件 |
+| 订阅 | [取消订阅](https://support.apple.com/en-us/118428) | 设备步骤、试用期限和收费方 |
+| 订阅 | [申请购买内容退款](https://support.apple.com/en-us/118223) | 资格、待处理付款、地区及到账限制 |
+| iCloud | [备份 iPhone 或 iPad](https://support.apple.com/en-us/108366) | 手动/自动备份、网络、电源、锁屏和空间条件 |
 
-For automated collection, first obtain and record an actual applicable permission
-basis (including permitted copying/cleaning/storage). A JSON file outside source
-control must contain `basis` describing that evidence and `allowed_urls` listing
-only covered article URLs. No permission record has been supplied or invented.
-The CLI accepts `--permission-record <path>` and still checks live robots rules;
-it does not determine the legal validity of a supplied grant. Do not fill it with
-an arbitrary acknowledgement merely to enable requests.
+六篇已通过软件及 AI 内容审查，并已人工核对修改密码整页。
+原始审查文件由维护者本地归档；写作所需的来源、方法、结果和剩余事项已列在公开文档中。
 
-## Pilot and expansion
+## 2. 先检查环境
 
-After access is resolved, run the first three seeds (one per topic):
+使用 Python 3.11，在项目根目录运行。维护者的环境名是 `rag`，组员可以用自己的名称。
+已有环境先核对依赖，不必批量升级。
 
 ```powershell
-python -m src.ingest collect --limit 3 --permission-record <actual-permission-record.json>
-python -m src.ingest validate
+python -B -m src.check_environment
+# 自己的环境缺少项目依赖时安装：
+python -m pip install -r requirements.txt
+# 要使用真实本地模型与向量检索时再安装：
+python -m pip install -r requirements-retrieval.txt
 ```
 
-Compare each saved raw HTML with its clean Markdown and the source page. Verify
-all headings, ordered/nested steps, notes, preconditions, link targets, dates and
-device/OS branches; look for navigation, error pages and missing trailing
-sections. The extractor accepts an `article` or `main` containing exactly one h1;
-it also supports the real saved Apple `#content > #sections` container, validated
-against the six user-saved files on 2026-10-24. It rejects other layouts. Stop and
-adapt selectors using actual saved HTML if the layout changes. The
-500-character/80-word threshold and contamination checks are
-heuristics, not proof of completeness.
-
-Only after the first three pass review, expand to all six:
+没有资料、模型或 API key，也可以运行合成测试：
 
 ```powershell
-python -m src.ingest collect --limit 6 --permission-record <actual-permission-record.json>
-python -m src.ingest validate
+python -B -m unittest discover -s tests -v
+# 已安装 Node 时可运行前端逻辑测试，无需 npm 安装：
+node --test tests/test_frontend.cjs
 ```
 
-Requests are serial, at least 3 seconds apart, with a 20-second timeout and at
-most 3 attempts for connection/timeouts or 5xx. 401/403/429 stop without retry;
-redirects stop before following and require URL mapping review. Live robots
-failure also blocks acquisition. `--refresh` explicitly rechecks existing
-documents; default reruns validate and reuse local snapshots without network.
-Run one process at a time; concurrent writers are not supported.
+## 3. 在自己的电脑准备资料
 
-## Manual fallback
+GitHub 不附 Apple 全文。通过正常浏览器访问允许阅读的官方页面，保存 HTML 到
+`data/manual/`，原文件名不用改成文章编号。导入器按 canonical URL（页面声明的规范网址）
+和文章标题识别文件。不要保存登录页或错误页，也不要绕过访问限制。
 
-When a lawfully obtained local HTML or UTF-8 text file is available, preserve it
-unmodified in `data/manual/`. Manual import requires an honest acquisition note,
-not proof of an Apple-issued license. This distinction corrects the initial
-overly broad wording: no individual written grant does not by itself establish
-that every personal/non-commercial use is prohibited. Conversely, manual saving
-does not automatically authorize publication, redistribution, or every RAG use.
-Apple's terms include conditional informational uses; the project must stay
-within applicable conditions. See `docs/MANUAL_COLLECTION_ZH.md` for practical
-steps. The following note describes acquisition/use, not official permission:
+先保存“取消订阅、修改账户密码、iCloud 备份”三篇（种子清单的前三条），
+导入并抽查，再保存其余三篇：
 
 ```powershell
-python -m src.ingest import --file data/manual/108366.html --format html --url https://support.apple.com/en-us/108366 --final-url https://support.apple.com/en-us/108366 --topic icloud --provenance "Saved manually from the public official page for local non-commercial coursework; no individual Apple permission obtained"
-python -m src.ingest import --file data/manual/108366.txt --format text --title "How to back up your iPhone or iPad with iCloud" --url https://support.apple.com/en-us/108366 --topic icloud --provenance "Saved manually from the public official page for local non-commercial coursework; no individual Apple permission obtained"
-python -m src.ingest validate
-```
-
-Text format must begin with the exact title (`# Title` is accepted), retain
-Markdown headings (`## Section`), steps and conditions. Do not summarize or use
-model-generated text. Text import preserves the original `.txt` bytes and uses
-`published_at: null`; it never invents an HTML snapshot or date. HTML import
-extracts a displayed Published Date as a source string if available. Final URL
-defaults to the declared source URL; explicitly supply the observed URL if known.
-Different article IDs/locales are rejected and require a reviewed new seed.
-
-## Data contract
-
-`data/sources.jsonl` contains one active record per `doc_id`:
-
-| Field | Meaning |
-|---|---|
-| doc_id | `apple-<locale>-<six-digit-article-id>` |
-| title | Extracted HTML title or explicitly declared text title |
-| source_url / final_url | Declared source and observed/declaratively supplied final URL |
-| topic / locale | Seed topic and validated URL locale |
-| fetched_at | Actual ingestion timestamp in UTC with timezone (manual: import time) |
-| published_at | Displayed date string from HTML, otherwise null |
-| ingestion_method | `http` or `manual` |
-| content_sha256 | SHA-256 of normalized clean UTF-8 text |
-| snapshot_sha256 | SHA-256 of exact original bytes |
-| snapshot_path / text_path | Paths relative to data root, content-versioned |
-| text | Clean text used by later chunking |
-| permission_basis | Legacy field name: HTTP permission basis or manual acquisition/use note; a manual note is not a license |
-| human_review | `pending` until the team actually verifies this version |
-
-Identical ID + body returns cached without adding records. Changed body replaces
-the active record and retains earlier snapshots. Identical body under a different
-ID is rejected for alias review. Local artifacts, hashes, required fields, URL
-mapping, title, body and duplicate checks must pass. Failed HTTP extraction keeps
-a diagnostic response under `data/logs/responses/`, never in the knowledge base.
-Event logs are append-only; repeated event lines are history, not duplicate docs.
-
-Only reviewed current versions should feed T03. Stage acceptance now combines
-software checks, six-article AI content review and the user-confirmed full-page
-check of Change your Apple Account password. See
-[the archived review](reviews/DATA_REVIEW_FINAL_20261024.md). Preserve the frozen
-JSONL and its legacy pending fields; record AI/user review separately in
-`docs/ARTICLE_REVIEW.md`. This is not full human approval of all six articles.
-Reimporting changed text requires version-specific review.
-
-## Verification boundaries
-
-`unittest` uses explicitly synthetic text and mocked requests in temporary
-directories. These tests verify software behavior, not Apple HTML compatibility,
-real acquisition, or official content correctness. A passing empty-directory
-test is never six real documents. `validate` returns nonzero for empty data.
-
-## User-saved filenames (2026-10-24)
-
-Do not rename files just to match article numbers. The saved-file importer reads
-the embedded canonical URL and verifies the h1 title against `data/seeds.json`.
-Unrelated or unrecognized HTML is reported in `skipped_files`, not counted as an
-import. Missing selected articles, title/canonical conflicts and duplicate selected
-identities remain errors; other valid selected articles continue. Only the first
-`--limit` seeds are selected. No network requests or original-file changes occur.
-
-```powershell
-python -B -m src.import_saved --limit 3 --provenance "User saved public official pages manually for local MIS2001 coursework; no individual Apple permission obtained"
+python -B -m src.import_saved --limit 3 --provenance "按实际情况填写获取方式和用途"
+python -B -m src.ingest validate
 python -B -m src.check_corpus
-# Inspect the pilot before proceeding to all six.
-python -B -m src.import_saved --limit 6 --provenance "User saved public official pages manually for local MIS2001 coursework; no individual Apple permission obtained"
+# 检查前三篇后，保存其余页面再运行：
+python -B -m src.import_saved --limit 6 --provenance "按实际情况填写获取方式和用途"
 python -B -m src.ingest validate
 python -B -m src.check_corpus
 ```
 
-`src.check_corpus` compares each current snapshot's information-bearing paragraphs
-in source order, heading order, list numbers and links with the clean text. It
-checks for known navigation/feedback artifacts. Generic “Need more help?” content
-is excluded; factual support contact links and disclaimers elsewhere are retained.
-Structural checks do not replace human review. All six passed in
-the local record `evidence/corpus_quality_20261024.json` (ignored; not supplied in
-a public checkout).
+抽查标题、步骤顺序、设备分支、前提条件、注意事项和链接是否保留，是否混入导航或反馈。
+`validate` 检查身份、文件和哈希；`check_corpus` 还比较 HTML 正文结构。
+纯文本导入只做适用检查，不会冒称通过 HTML 比对。空语料或检查失败会返回非零退出码。
 
-Text snapshots receive the same metadata, body, file and hash checks first.
-They report `html_structure_status: not_applicable`, with no invented HTML metrics.
-`passed` means applicable checks passed; summaries separate HTML passes from text
-records. Individual bad records, including malformed JSONL lines, remain in the
-report while other articles continue. Any failure or an empty corpus causes a
-nonzero exit code. Reports under `evidence/` and event logs remain local.
+如果只有允许使用的 UTF-8 纯文本，可保留标题、小标题、步骤和条件后手动导入，
+不使用模型摘要代替官方正文。参数见 `python -B -m src.ingest import --help`。
 
-For these manual files, `final_url` is the canonical URL embedded in the saved
-page, not a newly verified HTTP redirect destination. `fetched_at` is import time;
-the exact original browser download time is not inferred from file mtime.
+## 4. 导入后文件放在哪里
+
+| 本机路径 | 保存什么 |
+|---|---|
+| `data/manual/` | 自己保存的原始页面，导入时不改名 |
+| `data/raw/` | 导入器保留的原始快照 |
+| `data/clean/` | 清洗后的正文，历史版本也会保留 |
+| `data/sources.jsonl` | 每篇当前有效资料的记录：标题、网址、正文、版本哈希、原文与清洗文件路径 |
+| `evidence/` | 检查命令自动生成的本次报告和日志，不参与客服检索 |
+
+下游只读取 `data/sources.jsonl` 中的当前记录，不遍历 clean 目录，以免重复使用历史版本。
+同一资料重复导入不会追加重复记录；正文变化会更新活动版本并保留旧文件。
+
+这些路径在公开仓库中被忽略。新电脑导入自己的资料后会生成对应文件，
+不需要取得维护者过去某次导入的 JSON 报告。手动保存也不代表取得全文再发布许可。
+
+## 5. 建立索引并启动
+
+首次准备本地模型需要下载；其余命令使用本地资源。当前资料和提问均以英语为主，
+因此下面的示例问题保留英语。
+
+```powershell
+python -B -m src.embedding download
+python -B -m src.embedding check
+python -B -m src.retrieval build
+python -B -m src.retrieval query --question "How do I cancel an Apple subscription on my iPhone?"
+python -B -m src.web --port 5000
+```
+
+打开 `http://127.0.0.1:5000`。模型和索引会在应用启动时加载，后续请求复用。
+真实生成服务还未接入，当前页面展示真实检索证据及生成未配置状态。
+
+资料、模型或切块配置变化后，先停止服务，检查资料，显式重建后重启：
+
+```powershell
+python -B -m src.ingest validate
+python -B -m src.retrieval build --rebuild
+python -B -m src.web --port 5000
+```
+
+## 6. 检查检索结果和管理留档
+
+准备好本地资料、模型和索引后，可以运行开发问题集：
+
+```powershell
+python -B -m src.evaluate_copilot --extra-cases evaluation/review_cases.json
+```
+
+问题集保留题目和适用的预期文档标签。评测分别报告检索排名、生成未配置时的行为、
+资源复用，并把真实 LLM 语义质量列为待验证。返回成功不等于回答正确率通过。
+
+`evidence/` 是程序输出的本机运行记录；`dev_records/` 是维护者的工程调试和历史归档。
+两者均不上传 GitHub。组员写作直接使用[架构说明](ARCHITECTURE.md)中的结果摘要；
+需要某次原始运行材料时再由维护者提供。新的每轮调试总结放入 dev_records，不向 docs 累加报告。
+
+未来真实 LLM 的供应商和协议确认后再接适配器。当前填入 key 也不会启用真实生成；
+不要把 key 写进聊天或 Git。服务读取进程环境变量，不自动加载 `.env`。

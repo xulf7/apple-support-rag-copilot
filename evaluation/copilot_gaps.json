@@ -1,0 +1,34 @@
+[
+  {
+    "case_id": "N01",
+    "question": "How much does a 2 TB iCloud storage plan cost per month?"
+  },
+  {
+    "case_id": "N02",
+    "question": "Can I recover permanently deleted photos from iCloud?"
+  },
+  {
+    "case_id": "N03",
+    "question": "How do I get a refund for an iPhone hardware purchase from an Apple Store?"
+  },
+  {
+    "case_id": "N04",
+    "question": "On what exact date will my app refund arrive in my bank account?"
+  },
+  {
+    "case_id": "N05",
+    "question": "If I cancel my trial, will Apple automatically refund all earlier subscription payments?"
+  },
+  {
+    "case_id": "C01",
+    "question": "How do I fix it?"
+  },
+  {
+    "case_id": "C02",
+    "question": "Help with my Apple account."
+  },
+  {
+    "case_id": "L01",
+    "question": "How do I back up a PostgreSQL database on Linux using pg_dump?"
+  }
+]

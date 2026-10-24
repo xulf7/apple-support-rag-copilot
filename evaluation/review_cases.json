@@ -1,0 +1,90 @@
+[
+  {
+    "case_id": "R01",
+    "question": "How can I request a refund for an app that cost $9.99?",
+    "expected_doc_ids": [
+      "apple-en-us-118223"
+    ]
+  },
+  {
+    "case_id": "R02",
+    "question": "How do I back up my iPhone before a repair?",
+    "expected_doc_ids": [
+      "apple-en-us-108366"
+    ]
+  },
+  {
+    "case_id": "R03",
+    "question": "How do I stop paying for Apple Music?",
+    "expected_doc_ids": [
+      "apple-en-us-118428"
+    ]
+  },
+  {
+    "case_id": "R04",
+    "question": "What steps stop Apple Music from charging me again next month?",
+    "expected_doc_ids": [
+      "apple-en-us-118428"
+    ]
+  },
+  {
+    "case_id": "R05",
+    "question": "How can I ask for my money back for an app priced at five dollars?",
+    "expected_doc_ids": [
+      "apple-en-us-118223"
+    ]
+  },
+  {
+    "case_id": "R06",
+    "question": "Before I send my iPhone for repairs, how can I back it up?",
+    "expected_doc_ids": [
+      "apple-en-us-108366"
+    ]
+  },
+  {
+    "case_id": "R07",
+    "question": "How do I turn off automatic renewal for Apple TV+?",
+    "expected_doc_ids": [
+      "apple-en-us-118428"
+    ]
+  },
+  {
+    "case_id": "R08",
+    "question": "How can I unsubscribe from Apple Music?",
+    "expected_doc_ids": [
+      "apple-en-us-118428"
+    ]
+  },
+  {
+    "case_id": "G01",
+    "question": "How much does an iPhone screen repair cost, and how do I back up first?",
+    "expected_doc_ids": []
+  },
+  {
+    "case_id": "G02",
+    "question": "Can I request a refund for an iPhone hardware purchase?",
+    "expected_doc_ids": []
+  },
+  {
+    "case_id": "G03",
+    "question": "What is the price of a 2 TB iCloud plan?",
+    "expected_doc_ids": []
+  },
+  {
+    "case_id": "G04",
+    "question": "What steps recover permanently deleted iCloud photos?",
+    "expected_doc_ids": []
+  },
+  {
+    "case_id": "G05",
+    "question": "Can I get a guaranteed refund date for my app purchase?",
+    "expected_doc_ids": []
+  },
+  {
+    "case_id": "R09",
+    "question": "How do I request a refund for an iPhone app?",
+    "expected_doc_ids": [
+      "apple-en-us-118223"
+    ]
+  }
+]
