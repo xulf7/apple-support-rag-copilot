@@ -59,6 +59,12 @@ versions and existing evidence were preserved; the new reports use new filenames
 
 ## Git state and limits
 
+Historical note: the statements below describe the earlier preparation round.
+At retrieval development on 2026-10-24, an existing Git repository was verified,
+with branch `feature/retrieval-index`, origin remote and initial commit `47955f5`.
+That branch is reused; no repository initialization, staging, commit or push is
+performed by this retrieval round. See `RETRIEVAL_20261024.md` for current status.
+
 Actual Git probes in the project and its parent hierarchy reported `not a git
 repository`. No current branch, remote, tracked file list or commit history is
 available here. This is based on Git commands, not assumptions about a ZIP.

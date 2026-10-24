@@ -3,10 +3,12 @@
 MIS2001 academic prototype for internal customer service staff. Suggested responses
 will require staff review. This project is not affiliated with Apple.
 
-**Current status: data preparation only.** Six user-saved English (`en-us`) Apple
-Support articles passed local integrity and HTML structure checks. Team human
-review is still **pending**. Embeddings, indexing, retrieval, LLM generation and
-a web interface are **not implemented**; this is not a complete MVP.
+**Current status: data preparation and command-line vector retrieval.** Six frozen
+English (`en-us`) articles passed software checks and AI content review. The user
+also checked the entire Change your Apple Account password page, with no issue.
+Full human review of all six is not claimed; legacy pending fields are unchanged.
+Local embedding, persisted FAISS indexing and evidence search are implemented.
+LLM generation and a web interface are **not implemented**; this is not a complete MVP.
 
 The public source tree includes code, synthetic tests, URL seeds and documentation.
 It does **not** include Apple article bodies, course handouts, API keys, local
@@ -14,14 +16,17 @@ corpus files or raw execution evidence. A fresh checkout starts with no corpus.
 
 ## 1. Environment and tests - no corpus needed
 
-Python 3.11.5 was used for local verification. Reuse a suitable existing Python
-environment; no automatic environment creation, version switch or upgrade is
-required. Runtime dependencies are `requests` and `beautifulsoup4`, declared in
-`requirements.txt`. If imports fail, install only the missing dependencies.
+The existing conda **rag** environment (Python 3.11.5) is the recommended project
+environment. Its existing packages were reused without installation/upgrades.
+Select `rag` in VS Code and activate it in the terminal. Basic dependencies are
+in `requirements.txt`; optional retrieval versions are recorded in
+`requirements-retrieval.txt`. Check first and install only missing compatible
+packages; do not blindly upgrade an existing environment.
 
 From the project root in PowerShell:
 
 ```powershell
+conda activate rag
 python -B -m src.check_environment
 python -B -m src.ingest --help
 python -B -m unittest discover -s tests -v
@@ -81,8 +86,38 @@ report, other articles continue, and errors produce a nonzero exit status.
 
 The only active corpus is `data/sources.jsonl`, which maps each current document
 to its raw and clean version. Never ingest every file under `data/clean/`: earlier
-versions are retained there. Complete the [human checklist](docs/ARTICLE_REVIEW.md)
-before accepting the corpus.
+versions are retained there. See the [review record](docs/ARTICLE_REVIEW.md) for
+stage acceptance and remaining human-review limits.
+
+## 4. Local embedding and retrieval - no LLM key
+
+After local corpus preparation/review, download the fixed public model once:
+
+```powershell
+conda activate rag
+python -B -m src.embedding download
+python -B -m src.embedding check
+python -B -m src.retrieval build
+python -B -m src.retrieval inspect
+python -B -m src.retrieval query --question "How do I cancel an Apple subscription on my iPhone?"
+```
+
+`query` without `--question` prompts for an English question. Default top-k is 5;
+use `--json` for structured output. Only the explicit download command needs
+network access; model checks, builds and queries load local files only. Missing
+resources fail clearly. MiniLM runs on CPU and returns normalized 384-dimensional
+vectors; FAISS exact inner-product scores equal cosine similarity, not answer
+correctness probabilities. No customer response is generated.
+
+The tokenizer counts the complete model input, including title, section/context
+and special tokens. Configured limit is 240 versus the actual model limit of 256;
+the current 56 chunks have a maximum of 233 tokens. Index reload verifies model,
+configuration, active corpus, source mapping and artifact hashes. A mismatch
+requires explicit rebuilding: `python -B -m src.retrieval build --rebuild`.
+An unchanged repeat build uses the existing index without appending vectors.
+
+See [retrieval design and results](docs/RETRIEVAL_20261024.md) and
+[the archived review](docs/reviews/DATA_REVIEW_FINAL_20261024.md).
 
 ## Public files and local records
 
