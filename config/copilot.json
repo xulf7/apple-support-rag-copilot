@@ -1,0 +1,6 @@
+{
+  "candidate_k": 12,
+  "max_context_chunks": 8,
+  "context_char_budget": 12000,
+  "max_question_chars": 2000
+}

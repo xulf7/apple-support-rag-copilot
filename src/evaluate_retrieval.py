@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--index-dir", type=Path, default=Path("data/index"))
     parser.add_argument("--cases", type=Path, default=Path("evaluation/retrieval_cases.json"))
-    parser.add_argument("--report", type=Path, default=Path("evidence/retrieval_20261024/evaluation.json"))
+    parser.add_argument("--report", type=Path, default=Path("evidence/retrieval_evaluation_latest.json"))
     args = parser.parse_args()
     started = time.perf_counter()
     config = configuration(args.config)

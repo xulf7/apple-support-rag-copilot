@@ -1,4 +1,4 @@
-# Optional retrieval dependencies, matching the existing rag environment.
+# Optional retrieval dependencies; versions verified in the maintainer's local environment.
 numpy==1.26.4
 sentence-transformers==5.0.0
 faiss-cpu==1.11.0.post1
