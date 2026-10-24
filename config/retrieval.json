@@ -1,0 +1,10 @@
+{
+  "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+  "model_dir": "models/all-MiniLM-L6-v2",
+  "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "max_tokens": 240,
+  "overlap_tokens": 32,
+  "context_tokens": 48,
+  "batch_size": 16,
+  "cpu_threads": 4
+}

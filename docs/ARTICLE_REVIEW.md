@@ -1,6 +1,14 @@
 # First six articles: human review queue
 
-All six were **imported from user-saved HTML on 2026-10-24; human review pending**.
+All six were **imported from user-saved HTML on 2026-10-24; AI content review passed**.
+The [archived final review](reviews/DATA_REVIEW_FINAL_20261024.md) records the
+six frozen versions. Their body, snapshot and source URL bindings matched the
+current corpus before retrieval development. The user confirms reviewing the
+**entire Change your Apple Account password page**, with no issue, not merely one
+section. This does not establish full human review of all six documents.
+The six legacy `human_review: pending` fields remain unchanged to preserve the
+frozen corpus; user review and AI review are recorded here separately. T02 is
+accepted for this development stage and does not block T03-T04.
 Original filenames were preserved; canonical URLs and h1 titles match the seeds.
 The three-document pilot passed before expansion to six. Automated comparison
 passed for 152 paragraphs, 52 headings, 59 ordered steps and 33 distinct-per-document
@@ -23,4 +31,6 @@ A new checkout needs its own permitted saved pages and import.
 For every imported article, record: reviewer, review date, doc_id, content hash,
 source URL, raw/clean paths, headings/step comparison, important conditions,
 absence of navigation/error/feedback content, and pass/fail with corrections.
-No reviewer or pass result has been prefilled.
+Additional team review remains optional and should name the reviewer and version;
+do not convert AI review into a human signature. The user-confirmed full-page
+check above supersedes the earlier blanket statement that no human review exists.

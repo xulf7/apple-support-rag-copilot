@@ -116,9 +116,13 @@ mapping, title, body and duplicate checks must pass. Failed HTTP extraction keep
 a diagnostic response under `data/logs/responses/`, never in the knowledge base.
 Event logs are append-only; repeated event lines are history, not duplicate docs.
 
-Only reviewed current versions should feed T03. After actual review, update
-`human_review` in the JSONL and record reviewer/date/check results in
-`docs/ARTICLE_REVIEW.md`. Reimporting changed text resets review to pending.
+Only reviewed current versions should feed T03. Stage acceptance now combines
+software checks, six-article AI content review and the user-confirmed full-page
+check of Change your Apple Account password. See
+[the archived review](reviews/DATA_REVIEW_FINAL_20261024.md). Preserve the frozen
+JSONL and its legacy pending fields; record AI/user review separately in
+`docs/ARTICLE_REVIEW.md`. This is not full human approval of all six articles.
+Reimporting changed text requires version-specific review.
 
 ## Verification boundaries
 

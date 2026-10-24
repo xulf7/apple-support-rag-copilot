@@ -1,0 +1,15 @@
+[
+  {"case_id":"D01","category":"direct","question":"How do I change my Apple Account password on my iPhone?","expected_doc_ids":["apple-en-us-101567"]},
+  {"case_id":"D02","category":"direct","question":"I forgot my Apple Account password and cannot sign in. What recovery factors can I use?","expected_doc_ids":["apple-en-us-102656"]},
+  {"case_id":"D03","category":"direct","question":"How do I back up my iPhone manually with iCloud?","expected_doc_ids":["apple-en-us-108366"]},
+  {"case_id":"D04","category":"direct","question":"How can I request a refund for an app I bought from Apple?","expected_doc_ids":["apple-en-us-118223"]},
+  {"case_id":"D05","category":"direct","question":"How do I cancel an Apple subscription on my iPhone?","expected_doc_ids":["apple-en-us-118428"]},
+  {"case_id":"D06","category":"direct","question":"What should I expect during Apple Account recovery and can Apple Support shorten the wait?","expected_doc_ids":["apple-en-us-118574"]},
+  {"case_id":"P01","category":"paraphrase","question":"Where do I update the secret I use to log in to my Apple account on a trusted Mac?","expected_doc_ids":["apple-en-us-101567"]},
+  {"case_id":"P02","category":"paraphrase","question":"I am locked out and have no trusted device. Can my recovery contact or phone number help?","expected_doc_ids":["apple-en-us-102656"]},
+  {"case_id":"P03","category":"paraphrase","question":"What connections and screen state are needed for automatic cloud copies of my iPad?","expected_doc_ids":["apple-en-us-108366"]},
+  {"case_id":"P04","category":"paraphrase","question":"An App Store purchase is still pending. Can I ask to get my money back yet?","expected_doc_ids":["apple-en-us-118223"]},
+  {"case_id":"P05","category":"paraphrase","question":"I want to stop a trial from renewing. How far ahead must I end it?","expected_doc_ids":["apple-en-us-118428"]},
+  {"case_id":"P06","category":"paraphrase","question":"Will using a signed-in device while I wait interrupt my account restoration request?","expected_doc_ids":["apple-en-us-118574"]},
+  {"case_id":"O01","category":"out_of_scope_probe","question":"What is the repair price for a cracked MacBook display?","expected_doc_ids":[]}
+]

@@ -1,0 +1,7 @@
+# Optional retrieval dependencies, matching the existing rag environment.
+numpy==1.26.4
+sentence-transformers==5.0.0
+faiss-cpu==1.11.0.post1
+transformers==4.54.1
+tokenizers==0.21.4
+huggingface-hub==0.34.3

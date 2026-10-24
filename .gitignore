@@ -33,7 +33,7 @@ env/
 htmlcov/
 coverage.xml
 
-# Reserved generated models/indexes (not implemented yet).
+# Local model resources and generated retrieval indexes/chunk bodies.
 /.cache/
 /models/
 /data/models/
